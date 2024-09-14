@@ -67,7 +67,7 @@ exports.updateEvent = async (req, res) => {
 
       // Optional: Delete the old image from the server (if required)
       if (existingEvent.images && existingEvent.images.length > 0) {
-        const oldImagePath = path.join(__dirname, '..', existingEvent.images[0]);
+        const oldImagePath = path.join(__dirname, '../uploads');
         fs.unlink(oldImagePath, (err) => {
           if (err) {
             console.error('Failed to delete old image:', err);
