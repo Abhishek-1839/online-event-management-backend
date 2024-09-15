@@ -18,15 +18,7 @@ const storage = multer.diskStorage({
     } else {
       cb(new Error('Invalid file type. Only JPEG, PNG, and JPG are allowed.'), false); // Reject file
     }
-    // const fileTypes = /jpeg|jpg|png|gif/;
-    // const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-    // const mimeType = fileTypes.test(file.mimetype);
-  
-    // if (mimeType && extname) {
-    //   return cb(null, true);
-    // } else {
-    //   cb(new Error('Only images are allowed!'));
-    // }
+   
   };
   
   // Initialize upload middleware
