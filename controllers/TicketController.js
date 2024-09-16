@@ -24,14 +24,13 @@ exports.createTicketOrder = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
   
-    // console.log(ticketTypeName);
-      // Find the ticket type by name
-      const ticketTypeData = await TicketType.findOne({ name: { $regex: ticketTypeNamee, $options: 'i' } });
-      if (!ticketTypeData) {
-        console.log('TicketType not found:', ticketTypeNamee);
-        return res.status(404).json({ error: 'TicketType not found' });
-      }
-      console.log('TicketType found:', ticketTypeData);
+
+    const ticketTypeData = await TicketType.findOne({ name: { $regex: ticketTypeNamee, $options: 'i' } });
+    if (!ticketTypeData) {
+      console.log('TicketType not found:', ticketTypeNamee);
+      return res.status(404).json({ error: 'TicketType not found' });
+    }
+    console.log('TicketType found:', ticketTypeData);
 
 
 
@@ -45,39 +44,42 @@ exports.createTicketOrder = async (req, res) => {
       event: event._id,
       purchaser: purchaser._id,
       paymentMethod,
-      ticketType: ticketTypeData._id
-      // paymentStatus: 'pending'
+      ticketType: ticketTypeData._id,
+      paymentStatus: 'pending'
     });
 
 
     await ticket.save();
 
 
-const product = await stripe.products.create({
-      name: `Ticket for ${event.title}`,
-      description: `Ticket type: ${ticketTypeData.name}`
+// const product = await stripe.products.create({
+//       name: `Ticket for ${event.title}`,
+//       description: `Ticket type: ${ticketTypeData.name}`
+//     });
+// console.log(product);
+//     const price = await stripe.prices.create({
+//       unit_amount: ticketTypeData.price * 100, // Convert price to cents
+//       currency: 'USD',
+//       product: product.id
+//     });
+
+    // if (price) {
+    //   console.log(`Product ID: ${product.id}, Price ID: ${price.id}`);
+    //   res.json({
+    //     ticket,
+    //     message: "Ticket order created and Stripe product/price created.",
+    //     stripe: { productId: product.id, priceId: price.id }
+    //   });
+
+    res.json({
+      ticket,
+      message: "Ticket order created."
     });
-console.log(product);
-    const price = await stripe.prices.create({
-      unit_amount: ticketTypeData.price * 100, // Convert price to cents
-      currency: 'USD',
-      product: product.id
-    });
-
-    if (price) {
-      console.log(`Product ID: ${product.id}, Price ID: ${price.id}`);
-      res.json({
-        ticket,
-        message: "Ticket order created and Stripe product/price created.",
-        stripe: { productId: product.id, priceId: price.id }
-      });
-
-
-    } else {
-      return res.status(500).json({ error: 'Error in Stripe payment creation' });
-    }
+    // } else {
+    //   return res.status(500).json({ error: 'Error in Stripe payment creation' });
+    // }
   } catch (err) {
-    console.error(err);
+    console.error('Error in creating ticket order:', err);
     res.status(500).json({ error: 'Failed to create ticket order' });
   }
 };
