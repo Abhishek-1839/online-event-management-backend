@@ -81,8 +81,13 @@ const dotenv = require('dotenv');
 // Config env file
 dotenv.config();
 
-export const handleCheckoutPayment = async (req, res) => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const handleCheckoutPayment = async (req, res) => {
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+     
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).send({ error: "Stripe secret key is not configured" });
+  }
+
   try {
     const data = req.body;
     // Check if data is missing or not an array
@@ -95,11 +100,10 @@ export const handleCheckoutPayment = async (req, res) => {
         currency: "usd",
         product_data: {
           name: item.name,
-          images: [item.image_url], // Correct property name is 'images'
+          // images: [item.image_url], // Correct property name is 'images'
         },
         unit_amount: Math.round(item.price * 100), // Ensure price is correctly converted to cents
-      },
-      quantity: item.quantity,
+      }
     }));
 
     // Create checkout session
@@ -117,3 +121,5 @@ export const handleCheckoutPayment = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+module.exports = { handleCheckoutPayment };
