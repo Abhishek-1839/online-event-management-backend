@@ -9,7 +9,7 @@ dotenv.config();
 
 // Create a new ticket order
 exports.createTicketOrder = async (req, res) => {
-  const { eventId, purchaserId, paymentMethod } = req.body;
+  const { eventId, purchaserEmail, paymentMethod } = req.body;
   const ticketTypeNamee = req.body.ticketTypeName.trim();
   try {
 
@@ -17,7 +17,7 @@ exports.createTicketOrder = async (req, res) => {
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    const purchaser = await User.findById(purchaserId);
+    const purchaser = await User.findOne({email : purchaserEmail });
     if (!purchaser) {
       return res.status(404).json({ error: 'User not found' });
     }

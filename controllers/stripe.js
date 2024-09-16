@@ -77,7 +77,9 @@
 
 const stripe = require('../utils/stripe');
 const dotenv = require('dotenv');
+const Event = require('../models/event');
 const TicketType = require('../models/TicketType');
+const User = require('../models/User');
 
 // Config env file
 dotenv.config();
@@ -97,15 +99,15 @@ const handleCheckoutPayment = async (req, res) => {
     // if (!Array.isArray(data) || data.length === 0) {
     //   return res.status(400).send({ error: "Product data is required and must be an array" });
     // }
-    const { ticketTypeName, purchaserId, eventId } = req.body;
+    const { ticketTypeName, purchaserEmail, eventId } = req.body;
 
     // Validate the required data
-    if (!ticketTypeName || !purchaserId || !eventId) {
+    if (!ticketTypeName || !purchaserEmail || !eventId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const event = await Event.findById(eventId);
     const ticketType = await TicketType.findOne({ name: ticketTypeName });
-    const purchaser = await User.findById(purchaserId);
+    const purchaser = await User.findOne({email : purchaserEmail });
 
     if (!event || !ticketType || !purchaser) {
       return res.status(404).json({ error: "Event, ticket type, or user not found" });
