@@ -40,6 +40,8 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .catch(err => console.error(err));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 app.get("/payment", makePayment);
 app.post("/checkout", checkout);
 
