@@ -75,16 +75,17 @@
   
 //   module.exports = { makePayment, checkout };
 
-const Stripe = require("stripe")
+const stripe = require('../utils/stripe');
 const dotenv = require('dotenv');
+const TicketType = require('../models/TicketType');
 
 // Config env file
 dotenv.config();
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-if (!process.env.STRIPE_SECRET_KEY) {
-  return res.status(500).send({ error: "Stripe secret key is not configured" });
-}
+// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+// if (!process.env.STRIPE_SECRET_KEY) {
+//   return res.status(500).send({ error: "Stripe secret key is not configured" });
+// }
 
 const handleCheckoutPayment = async (req, res) => {
   
@@ -103,7 +104,7 @@ const handleCheckoutPayment = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const event = await Event.findById(eventId);
-    const ticketType = await ticketType.findOne({ name: ticketTypeName });
+    const ticketType = await TicketType.findOne({ name: ticketTypeName });
     const purchaser = await User.findById(purchaserId);
 
     if (!event || !ticketType || !purchaser) {
@@ -122,6 +123,7 @@ const handleCheckoutPayment = async (req, res) => {
     }));
 
     // Create checkout session
+ 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,

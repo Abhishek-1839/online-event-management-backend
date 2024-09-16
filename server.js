@@ -13,12 +13,12 @@ const authMiddleware = require('./middleware/auth');
 const cookieParser = require('cookie-parser');
 const ticketTypeRoutes = require('./routes/ticketType');
 const registrationRoute = require('./routes/registration');
-const { makePayment, checkout } = require("./controllers/stripe");
+const { handleCheckoutPayment } = require("./controllers/stripe");
 dotenv.config(); // Add this line
 
 const app = express();
 const port = 3000;
-
+app.use(express.json());
 app.use(cookieParser());
 
 // CORS configuration options
@@ -45,7 +45,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // app.get("/payment", );
 app.post("/checkout", handleCheckoutPayment);
 
-app.use(express.json());
+
 app.use('/ticketapi', ticketroutes);
 app.use('/api/ticket-types', ticketTypeRoutes);
 app.use(authRoutes);

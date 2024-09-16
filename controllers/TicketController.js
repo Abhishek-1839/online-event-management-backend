@@ -2,9 +2,7 @@ const TicketType = require('../models/TicketType');
 const Ticket = require('../models/Ticket');
 const Event = require('../models/event');
 const User = require('../models/User');
-const stripe = require("stripe")(
-  "sk_test_51PyGFxHRivblCT2O3RyxhOInJuJcDCLHdAwKFM5fM8BmvsLsHbuYanVZyPauUJGsuDmhMj2fsXGYegoNtxxoXzdW00c7zkYAjY"
-);
+const stripe = require('../utils/stripe');
 const nodemailer = require('nodemailer'); // Nodemailer for sending emails
 const dotenv = require('dotenv'); 
 dotenv.config();
