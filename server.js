@@ -42,8 +42,8 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-app.get("/payment", makePayment);
-app.post("/checkout", checkout);
+// app.get("/payment", );
+app.post("/checkout", handleCheckoutPayment);
 
 app.use(express.json());
 app.use('/ticketapi', ticketroutes);
