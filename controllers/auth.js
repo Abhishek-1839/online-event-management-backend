@@ -97,7 +97,7 @@ const loginUser = async (req, res) => {
       // Generate JWT token (for session management)
       // This is where you would issue the JWT token
 
-      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN
       });
 
