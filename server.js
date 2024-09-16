@@ -43,7 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // app.get("/payment", );
-app.post("/checkout", handleCheckoutPayment);
+app.post("/checkout",authMiddleware, handleCheckoutPayment);
 
 
 app.use('/ticketapi', ticketroutes);
