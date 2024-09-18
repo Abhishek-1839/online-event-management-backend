@@ -53,7 +53,10 @@ app.use("/profile", authMiddleware, userroute);
 app.use('/api/events', eventRouter); // Assuming eventRouter handles event-related routes
 app.use('/api/events/schedule', eventScheduleRoutes); // Register the event schedule routes
 app.use('/api/events/analytics', analyticsRoutes);
-
+app.post('/auth/logout', (req, res) => {
+  res.clearCookie('jwtToken');
+  res.json({ message: 'Logged out successfully' });
+});
 app.use('/api', registrationRoute);
 
 app.listen(port, () => {

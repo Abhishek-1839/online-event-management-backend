@@ -38,20 +38,20 @@ const authMiddleware = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Decoded Token:', decoded);
 
-        const { email } = decoded;
+        const { id } = decoded;
         // Find the user by ID from the token payload
-        const user = await User.findOne({ email });
+        const user = await User.findById(id);
         if (!user) {
             return res.status(401).json({ error: 'Please authenticate.' });
         }
-        req.user = { email: user.email };
+        req.user = { id: user._id, email: user.email };
 
         // Add a check for logout request
-        if (req.url === '/auth/logout') {
-            // Clear the JWT token from the cookie
-            res.clearCookie('jwtToken');
-            return res.json({ message: "Logged out successfully" });
-        }
+        // if (req.url === '/auth/logout') {
+        //     // Clear the JWT token from the cookie
+        //     res.clearCookie('jwtToken');
+        //     return res.json({ message: "Logged out successfully" });
+        // }
         
         next();
     }

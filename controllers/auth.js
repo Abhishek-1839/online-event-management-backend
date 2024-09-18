@@ -109,7 +109,9 @@ const loginUser = async (req, res) => {
       });
 
       // For simplicity, returning user info
-      res.json({ user: user._id, isLoggedIn: true });
+      res.json({ token: token, user: { _id: user._id, email: user.email }, isLoggedIn: true });
+
+    //   res.json({ token:token, user: user._id, isLoggedIn: true });
   } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
