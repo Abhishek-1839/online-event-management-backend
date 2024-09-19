@@ -123,16 +123,18 @@ const handleCheckoutPayment = async (req, res) => {
     //   },  // images: [ticketType.image_url], // Add the image URL in 'images' array if available
     //   quantity: 1,
     // };
-    const lineItems = {
-      price_data: {
-        currency: "usd", // Currency in USD
-        product_data: {
-          name: `Ticket for ${event.title} - ${ticketType.name}`, // Product name
+    const lineItems = [
+      {
+        price_data: {
+          currency: "usd", // Currency in USD
+          product_data: {
+            name: `Ticket for ${event.title} - ${ticketType.name}`, // Product name
+          },
+          unit_amount: ticketType.price * 100, // Convert price to cents (Stripe expects smallest currency unit)
         },
-        unit_amount: ticketType.price * 100, // Convert price to cents (Stripe expects smallest currency unit)
+        quantity: 1, // Specify the quantity of the item
       },
-      quantity: 1, // Specify the quantity of the item
-    };
+    ];
 
     // Create checkout session
  
@@ -144,7 +146,7 @@ const handleCheckoutPayment = async (req, res) => {
       cancel_url: `${req.headers.origin}/cancel`, // Properly include cancel_url
     });
 
-    res.status(200).json({ sessionId: session.id });
+  return res.status(200).json({ sessionId: session.id });
   } catch (error) {
     console.error("Error creating Stripe checkout session:", error);
     res.status(500).send({ error: "Internal Server Error" });
