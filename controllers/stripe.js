@@ -112,17 +112,27 @@ const handleCheckoutPayment = async (req, res) => {
     if (!event || !ticketType || !purchaser) {
       return res.status(404).json({ error: "Event, ticket type, or user not found" });
     }
-    const lineItems = data.map((item) => ({
+    // const lineItems = {
+    //   price_data: {
+    //     currency: "usd",
+    //     product_data: {
+    //       name: `Ticket for ${event.title} - ${ticketType.name}`,
+    //       // images: [item.image_url], // Correct property name is 'images'
+    //     },
+    //     unit_amount: ticketType.price * 100, // Convert price to cents
+    //   },  // images: [ticketType.image_url], // Add the image URL in 'images' array if available
+    //   quantity: 1,
+    // };
+    const lineItems = {
       price_data: {
-        currency: "usd",
+        currency: "usd", // Currency in USD
         product_data: {
-          name: `Ticket for ${item.title} - ${ticketType.name}`,
-          // images: [item.image_url], // Correct property name is 'images'
+          name: `Ticket for ${event.title} - ${ticketType.name}`, // Product name
         },
-        unit_amount: ticketType.price * 100, // Convert price to cents
+        unit_amount: ticketType.price * 100, // Convert price to cents (Stripe expects smallest currency unit)
       },
-      quantity: 1,
-    }));
+      quantity: 1, // Specify the quantity of the item
+    };
 
     // Create checkout session
  
