@@ -84,25 +84,12 @@ const User = require('../models/User');
 // Config env file
 dotenv.config();
 
-// const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-// if (!process.env.STRIPE_SECRET_KEY) {
-//   return res.status(500).send({ error: "Stripe secret key is not configured" });
-// }
-
 const handleCheckoutPayment = async (req, res) => {
-  
-     
-  
   try {
-    // const data = req.body;
-    // // Check if data is missing or not an array
-    // if (!Array.isArray(data) || data.length === 0) {
-    //   return res.status(400).send({ error: "Product data is required and must be an array" });
-    // }
-    const { ticketTypeName, purchaserId, eventId } = req.body;
+    const { ticketTypeName, purchaserId, eventId, paymentAmount, currency } = req.body;
 
     // Validate the required data
-    if (!ticketTypeName || !purchaserId || !eventId) {
+    if (!ticketTypeName || !purchaserId || !eventId || !paymentAmount) {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const event = await Event.findById(eventId);
@@ -112,17 +99,18 @@ const handleCheckoutPayment = async (req, res) => {
     if (!event || !ticketType || !purchaser) {
       return res.status(404).json({ error: "Event, ticket type, or user not found" });
     }
-    // const lineItems = {
-    //   price_data: {
-    //     currency: "usd",
-    //     product_data: {
-    //       name: `Ticket for ${event.title} - ${ticketType.name}`,
-    //       // images: [item.image_url], // Correct property name is 'images'
-    //     },
-    //     unit_amount: ticketType.price * 100, // Convert price to cents
-    //   },  // images: [ticketType.image_url], // Add the image URL in 'images' array if available
-    //   quantity: 1,
-    // };
+
+
+    const convertToUSD = (amountInINR) => {
+      const conversionRate = 0.011; // Example conversion rate (INR to USD)
+      return amountInINR * conversionRate;
+    };
+    
+    // Convert INR to USD and then to cents
+    const priceInUSD = convertToUSD(paymentAmount);
+    const priceInCents = Math.round(priceInUSD * 100);
+
+
     const lineItems = [
       {
         price_data: {
@@ -130,7 +118,7 @@ const handleCheckoutPayment = async (req, res) => {
           product_data: {
             name: `Ticket for ${event.title} - ${ticketType.name}`, // Product name
           },
-          unit_amount: ticketType.price * 100, // Convert price to cents (Stripe expects smallest currency unit)
+          unit_amount: priceInCents, // Convert price to cents (Stripe expects smallest currency unit)
         },
         quantity: 1, // Specify the quantity of the item
       },

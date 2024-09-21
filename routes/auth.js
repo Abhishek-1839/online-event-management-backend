@@ -14,6 +14,7 @@ const {
     loginUser,
     forgotPassword,
     resetPassword,
+    logoutUser
     // getMe
 } = require('../controllers/auth');
 
@@ -26,5 +27,5 @@ router.get('/activate/:token', activateUser);
 router.post('/login', loginUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
-
+router.post('/logout', logoutUser);
 module.exports = router;

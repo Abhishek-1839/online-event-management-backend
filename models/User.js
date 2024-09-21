@@ -14,10 +14,10 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
-  },
+  }, role:{type: String},
   activationToken: { type: String },
   resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date }
+  resetPasswordExpires: { type: Date } 
 }, { timestamps: true });
 
 // Hash the password before saving the user

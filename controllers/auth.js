@@ -10,23 +10,11 @@ const generateActivationToken = (id) => {
 };
 
 
-// exports.register = async (req, res) => {
-//   try {
-//     const user = new User(req.body);
-//     await user.save();
-//     const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
-//       expiresIn: '1h'
-//     });
-//     res.status(201).json({ token });
-//   } catch (err) {
-//     res.status(400).json({ error: err.message });
-//   }
-// };
 const registerUser = async (req, res) => {
   console.log('Received registration request:', req.body);
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
   try {
-      const user = await User.create({ name, email, password });
+      const user = await User.create({ name, email, password, role });
 
 
       // Generate activation token
@@ -97,7 +85,7 @@ const loginUser = async (req, res) => {
       // Generate JWT token (for session management)
       // This is where you would issue the JWT token
 
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN
       });
 
@@ -105,11 +93,12 @@ const loginUser = async (req, res) => {
       res.cookie('jwtToken', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',  // Use secure in production
-          sameSite: 'None' // Prevent CSRF
+          sameSite: 'Lax',
+          maxAge: 24 * 60 * 60 * 1000, // Prevent CSRF
       });
 
       // For simplicity, returning user info
-      res.json({ token: token, user: { _id: user._id, email: user.email }, isLoggedIn: true });
+      res.json({ token: token, user: { _id: user._id, email: user.email, role: user.role }, isLoggedIn: true });
 
     //   res.json({ token:token, user: user._id, isLoggedIn: true });
   } catch (err) {
@@ -189,18 +178,22 @@ const resetPassword = async (req, res) => {
 };
 
 
-const logoutUser = async (req, res) => {
-  try {
+const logoutUser = (req, res) => {
+    try {
       // Clear the JWT token from the cookie
-      res.clearCookie('jwtToken');
-
+      res.clearCookie('jwtToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Make sure this works in production
+        sameSite: 'None' // Prevent CSRF attacks
+      });
+      console.log("Logout successful");
       // Return a success response
-      res.json({ message: "Logged out successfully" });
-  } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-  }
-};
+      return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (err) {
+      console.error('Error logging out:', err);
+      return res.status(500).json({ error: 'Failed to log out' });
+    }
+  };
 
 
 module.exports = {

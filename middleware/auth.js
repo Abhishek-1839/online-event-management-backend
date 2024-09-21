@@ -20,16 +20,21 @@ const User = require('../models/User');
 
 const authMiddleware = async (req, res, next) => {
     try {
-        // const authHeader = req.get('Authorization');
-        // if (!authHeader) {
-        //   return res.status(400).json({ error: 'Authorization header missing' });
+
+        const token = req.cookies.jwtToken;
+
+        if (!token && req.headers.Authorization) {
+            token = req.headers.Authorization.split(' ')[1]; // Bearer <token>
+        }
+        // const authHeader = req.headers['Authorization'];
+
+        // //   // Check if authorization header exists and starts with 'Bearer'
+        // if (authHeader && authHeader.startsWith('Bearer ')) {
+        //     //     // Extract the token (split at the space and take the second part)
+        //     const token = authHeader.split(' ')[1];
         // }
-        // const token = authHeader.replace('Bearer ', '');
-        // console.log('Token:', token);
-
-        const token = req.cookies.jwtToken
-
         if (!token) {
+            console.error("No token found in request");
             return res.status(401).json({ error: "Unauthorized" });
         }
 
@@ -37,6 +42,7 @@ const authMiddleware = async (req, res, next) => {
         //   Verify the JWT token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Decoded Token:', decoded);
+        console.log("Token expiry time:", decoded.exp);
 
         const { id } = decoded;
         // Find the user by ID from the token payload
@@ -44,15 +50,9 @@ const authMiddleware = async (req, res, next) => {
         if (!user) {
             return res.status(401).json({ error: 'Please authenticate.' });
         }
-        req.user = { id: user._id, email: user.email };
+        req.user = { id: user._id, email: user.email, role: decoded.role };
 
-        // Add a check for logout request
-        // if (req.url === '/auth/logout') {
-        //     // Clear the JWT token from the cookie
-        //     res.clearCookie('jwtToken');
-        //     return res.json({ message: "Logged out successfully" });
-        // }
-        
+
         next();
     }
     catch (err) {
