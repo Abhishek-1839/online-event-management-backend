@@ -65,10 +65,13 @@ const activateUser = async (req, res) => {
 
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   try {
+    console.log('Login attempt:', { email, role });
+
       const user = await User.findOne({ email });
       if (!user) return res.status(400).json({ error: "User not found" });
+      console.log('User found:', { email: user.email, role: user.role });
       console.log('Hashed password in DB:', user.password);
 
       const isMatch = await user.comparePassword(password); // plain text password from login
@@ -80,12 +83,24 @@ const loginUser = async (req, res) => {
       }
       if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-      // if (!user.isActive) return res.status(400).json({ error: "Please activate your account" });
+ // Check role based on presence of 'role' field
+ const userRole = user.role ? 'admin' : 'user';
+ console.log('Determined user role:', userRole);
+
+ if (userRole !== role) {
+   console.log('Role mismatch');
+   if (userRole === 'admin') {
+     return res.status(403).json({ error: "You are an admin. Please log in using the admin option." });
+   } else {
+     return res.status(403).json({ error: "You are not an admin. Please log in using the non-admin option." });
+   }
+ }
+
 
       // Generate JWT token (for session management)
       // This is where you would issue the JWT token
 
-      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ id: user._id, role: userRole }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN
       });
 
@@ -98,7 +113,7 @@ const loginUser = async (req, res) => {
       });
 
       // For simplicity, returning user info
-      res.json({ token: token, user: { _id: user._id, email: user.email, role: user.role }, isLoggedIn: true });
+      res.json({ token: token, user: { _id: user._id, email: user.email, role: userRole }, isLoggedIn: true });
 
     //   res.json({ token:token, user: user._id, isLoggedIn: true });
   } catch (err) {
