@@ -37,21 +37,20 @@ exports.createTicketOrder = async (req, res) => {
     }
 
 
-    // Create a new ticket
-    const ticket = new Ticket({
-      event: event._id,
-      purchaser: purchaser._id,
-      paymentMethod,
-      ticketType: ticketTypeData._id,
-      paymentStatus: 'pending'
-    });
+    // // Create a new ticketticket,
+    // const ticket = new Ticket({
+    //   event: event._id,
+    //   purchaser: purchaser._id,
+    //   paymentMethod,
+    //   ticketType: ticketTypeData._id,
+    //   paymentStatus: 'pending'
+    // });
+    // console.log("Created ticket:", ticket);
 
-
-    await ticket.save();
+    // await ticket.save();
 
 
     res.json({
-      ticket,
       message: "Ticket order created."
     });
 
@@ -124,3 +123,41 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// Controller to get payment status of a ticket
+exports.getPaymentStatus = async (req, res) => {
+  try {
+    const ticketId = req.params.id; // Get the ticket ID from the request params
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    // Send the payment status back to the client
+    res.status(200).json({ status: ticket.paymentStatus });
+  } catch (error) {
+    console.error('Error fetching payment status:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+exports.getTicketIdBySession = async (req, res) => {
+  const { sessionId } = req.params; // Get the session ID from the request params
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId); // Retrieve the session from Stripe
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const ticketId = session.metadata.ticketId; // Get the ticketId from the session's metadata
+    if (!ticketId) {
+      return res.status(404).json({ error: 'Ticket ID not found in session metadata' });
+    }
+    // Return the ticketId to the frontend
+    res.status(200).json({ ticketId });
+  } catch (error) {
+    console.error('Error fetching session from Stripe:', error);
+    res.status(500).json({ error: 'Failed to retrieve session' });
+  }
+};

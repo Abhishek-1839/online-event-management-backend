@@ -14,17 +14,24 @@ const cookieParser = require('cookie-parser');
 const ticketTypeRoutes = require('./routes/ticketType');
 const registrationRoute = require('./routes/registration');
 const { handleCheckoutPayment } = require("./controllers/stripe");
+const bodyParser = require('body-parser');
+const webhookRouter = require('./routes/stripeWebhooks');
 dotenv.config(); // Add this line
 
 const app = express();
 const port = 3000;
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json());
+
+// Use the webhook router (ensure this is before bodyParser.json() for raw body handling)
+app.use('/', webhookRouter); 
+
 
 // CORS configuration options
 const corsOptions = {
     // Option 1: Allow all origins (least secure, most permissive)
-    origin: 'https://fantastic-twilight-322d07.netlify.app',
+    origin: 'http://localhost:5173',
     
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],

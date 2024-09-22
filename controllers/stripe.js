@@ -79,6 +79,7 @@ const stripe = require('../utils/stripe');
 const dotenv = require('dotenv');
 const Event = require('../models/event');
 const TicketType = require('../models/TicketType');
+const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 
 // Config env file
@@ -96,10 +97,13 @@ const handleCheckoutPayment = async (req, res) => {
     const ticketType = await TicketType.findOne({ name: ticketTypeName });
     const purchaser = await User.findById(purchaserId);
 
+    console.log('Event:', event);
+    console.log('Ticket Type:', ticketType);
+    console.log('Purchaser:', purchaser);
+
     if (!event || !ticketType || !purchaser) {
       return res.status(404).json({ error: "Event, ticket type, or user not found" });
     }
-
 
     const convertToUSD = (amountInINR) => {
       const conversionRate = 0.011; // Example conversion rate (INR to USD)
@@ -109,7 +113,19 @@ const handleCheckoutPayment = async (req, res) => {
     // Convert INR to USD and then to cents
     const priceInUSD = convertToUSD(paymentAmount);
     const priceInCents = Math.round(priceInUSD * 100);
+    // Create a new ticket
 
+    
+    const ticket = new Ticket({
+      event: event._id,
+      purchaser: purchaser._id,
+      paymentMethod:"card",
+      ticketType: ticketType._id,
+      paymentStatus: 'pending'
+    });
+    console.log("Created ticket:", ticket);
+
+    await ticket.save();
 
     const lineItems = [
       {
@@ -132,6 +148,7 @@ const handleCheckoutPayment = async (req, res) => {
       mode: "payment",
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/cancel`, // Properly include cancel_url
+      metadata: { ticketId: ticket._id.toString() }, 
     });
 
   return res.status(200).json({ sessionId: session.id });
