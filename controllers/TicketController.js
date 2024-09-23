@@ -3,7 +3,7 @@ const Ticket = require('../models/Ticket');
 const Event = require('../models/event');
 const User = require('../models/User');
 const stripe = require('../utils/stripe');
-const nodemailer = require('nodemailer'); // Nodemailer for sending emails
+const { sendEmail } = require('../utils/email');
 const dotenv = require('dotenv'); 
 dotenv.config();
 
@@ -36,20 +36,6 @@ exports.createTicketOrder = async (req, res) => {
       return res.status(404).json({ error: 'Event, user, or ticket type not found' });
     }
 
-
-    // // Create a new ticketticket,
-    // const ticket = new Ticket({
-    //   event: event._id,
-    //   purchaser: purchaser._id,
-    //   paymentMethod,
-    //   ticketType: ticketTypeData._id,
-    //   paymentStatus: 'pending'
-    // });
-    // console.log("Created ticket:", ticket);
-
-    // await ticket.save();
-
-
     res.json({
       message: "Ticket order created."
     });
@@ -63,7 +49,7 @@ exports.createTicketOrder = async (req, res) => {
 // Confirm payment and update ticket status
 exports.confirmPayment = async (req, res) => {
   const ticketId = req.params.id;
-  const { paymentIntentId } = req.body;
+  const sessionId = req.query.session_id;
 
   try {
     const ticket = await Ticket.findById(ticketId).exec();
@@ -72,27 +58,41 @@ exports.confirmPayment = async (req, res) => {
     }
 
 
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Extract the payment intent ID from the session
+    const paymentIntentId = session.payment_intent;
+
+
+    // Retrieve the payment intent details from Stripe
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-console.log(paymentIntent.success);
+
+
     if (paymentIntent.status === 'succeeded') {
+
+      const ticket = await Ticket.findById(ticketId).exec();
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket not found' });
+      }
+
       ticket.paymentStatus = 'paid';
       await ticket.save();
 
       // Send confirmation email
       const purchaser = await User.findById(ticket.purchaser);
       const event = await Event.findById(ticket.event);
+      // Use the imported sendEmail function
       await sendEmail(
         purchaser.email,
         `Ticket Purchase Confirmation for ${event.title}`,
         `Your payment for the event ${event.title} has been successful.`
       );
 
-      res.json({ message: 'Payment successful and ticket confirmed', ticket });
+       return res.json({ message: 'Payment successful and ticket confirmed', ticket });
     } else {
-      res.status(400).json({ error: 'Payment verification failed' });
+      return res.status(400).json({ error: 'Payment was not successful' });
     }
   } catch (err) {
-    console.error(err);
+  console.error('Error confirming payment:', err);
     res.status(500).json({ error: 'Failed to confirm payment' });
   }
 };

@@ -16,7 +16,7 @@ exports.getEventAnalytics = async (req, res) => {
     const analytics = await Promise.all(
       events.map(async (event) => {
         const tickets = await Ticket.find({ event: event._id }).exec();
-        const pendingTickets = await Ticket.find({ event: event._id, paymentStatus: "pending" }).exec();
+        const pendingTickets = await Ticket.find({ event: event._id, paymentStatus: "paid" }).exec();
         const ticketSales = tickets.reduce((total, ticket) => total + ticket.price, 0);
         const attendance = tickets.length;
         return {
