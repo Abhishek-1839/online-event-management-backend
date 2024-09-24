@@ -84,7 +84,7 @@ const loginUser = async (req, res) => {
       if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
  // Check role based on presence of 'role' field
- const userRole = user.role ? 'admin' : 'user';
+ const userRole = user.role;
  console.log('Determined user role:', userRole);
 
  if (userRole !== role) {
