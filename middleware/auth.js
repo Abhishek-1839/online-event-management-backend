@@ -28,14 +28,22 @@ const authMiddleware = async (req, res, next) => {
         //     token = req.headers.Authorization.split(' ')[1]; // Bearer <token>
         // }
         console.log(token);
-        const authHeader = req.headers.authorization;
-        console.log(req.headers);
+        if (req.body.token) {
+            token = req.body.token;
+          }
+          // Check if the token is in the request headers
+          else if (req.headers.authorization) {
+            token = req.headers.authorization.split(' ')[1]; // Extract the token from the "Bearer <token>" format
+          }
+      
+        // const authHeader = req.headers.authorization;
+        // console.log(req.headers);
 
-        // //   // Check if authorization header exists and starts with 'Bearer'
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            //     // Extract the token (split at the space and take the second part)
-            token = authHeader.split(' ')[1];
-        }
+        // // //   // Check if authorization header exists and starts with 'Bearer'
+        // if (authHeader && authHeader.startsWith('Bearer ')) {
+        //     //     // Extract the token (split at the space and take the second part)
+        //     token = authHeader.split(' ')[1];
+        // }
         if (!token) {
             console.error("No token found in request");
             return res.status(401).json({ error: "Unauthorized" });
