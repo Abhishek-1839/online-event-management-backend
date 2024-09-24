@@ -21,18 +21,21 @@ const User = require('../models/User');
 const authMiddleware = async (req, res, next) => {
     try {
 
-        const token = req.cookies.jwtToken;
+        // const token = req.cookies.jwtToken;
+        let token;
 
-        if (!token && req.headers.Authorization) {
-            token = req.headers.Authorization.split(' ')[1]; // Bearer <token>
-        }
-        // const authHeader = req.headers['Authorization'];
+        // if (req.headers.Authorization) {
+        //     token = req.headers.Authorization.split(' ')[1]; // Bearer <token>
+        // }
+        console.log(token);
+        const authHeader = req.headers.authorization;
+        console.log(req.headers);
 
         // //   // Check if authorization header exists and starts with 'Bearer'
-        // if (authHeader && authHeader.startsWith('Bearer ')) {
-        //     //     // Extract the token (split at the space and take the second part)
-        //     const token = authHeader.split(' ')[1];
-        // }
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            //     // Extract the token (split at the space and take the second part)
+            token = authHeader.split(' ')[1];
+        }
         if (!token) {
             console.error("No token found in request");
             return res.status(401).json({ error: "Unauthorized" });
