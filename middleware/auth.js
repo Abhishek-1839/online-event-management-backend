@@ -32,7 +32,7 @@ const authMiddleware = async (req, res, next) => {
             token = req.body.token;
           }
           // Check if the token is in the request headers
-          else if (req.headers.authorization) {
+          else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
             token = req.headers.authorization.split(' ')[1]; // Extract the token from the "Bearer <token>" format
           }
       
