@@ -31,7 +31,6 @@ app.use('/', webhookRouter);
 // CORS configuration options
 const corsOptions = {
     // Option 1: Allow all origins (least secure, most permissive)
-    // origin: 'https://fantastic-twilight-322d07.netlify.app',
     // origin: 'http://localhost:5173',
     origin: 'https://ubiquitous-halva-cf131d.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
